@@ -154,10 +154,10 @@ void max7219_init() {
 
 void initDevices()
 {
-  DDRE = 0x00;
+  DDRB = 0x00;
   TCCR0 |= (1 << CS01);
   TCCR1B |= (1 << CS12);
-  TIMSK |= (1 << TOIE0) | (1 << TOIE1);
+  TIMSK |= (1 << TOIE0) | (1 << TOIE1) | (1 << TOIE2);
 }
 
 int numTable[10][8] = {
@@ -328,11 +328,15 @@ void clearDisplay(unsigned char ic)
    max7219_send(0, j, 0);
 }
 
+void FormatDate();
+
 // GLOBAL VARIABLES
 int year[4] = { 2, 0, 0, 0 }; // yyyy
-int date[4] = { 0, 1, 0, 1 }; // mm.dd
+int date[4] = { 1, 0, 0, 1 }; // mm.dd
 int time[6] = 0; // hh:mm:ss
 int time_var = 0;
+unsigned char blink_var = 0;
+unsigned char click_available = 0;
 
 // INTERRUPT
 #pragma vector = TIMER1_OVF_vect
@@ -342,12 +346,19 @@ int time_var = 0;
    
         // CHANGE
         // FOR TESTING INCREMENTS MINUTES
-        time[4]++;    // increment seconds
-        time_var++;
+        time[2]++;    // increment seconds
+        //date[3]++;
         
-        
+        time_var++; 
  }
-
+#pragma vector = TIMER2_OVF_vect
+ __interrupt void timer2()
+ {
+    TCNT2 = 20000;
+    
+    click_available = 1;
+   
+ }
 
 
 
@@ -369,21 +380,101 @@ int main(void) {
 		max7219_intensity(ic, 8); //intensity
 		max7219_scanlimit(ic, 15);
 	}
-
-	unsigned char i = 0;
-	unsigned char j = 0;
-        int clrDsp = 0;
         
-        // print time
-        DrawNumber(3, time[5]);
-        DrawNumber(2, time[4]);
-        DrawNumber(1, time[3]);
-        DrawNumber(0, time[2]);
+        int cur_digit = 5;
+        int temp_time[6] = 0;
+        // SET Hour/Minute
+        for(;;)
+        {
+          unsigned char btn_clicked = 0;
+          if(click_available)
+          {
+              // print time
+              DrawNumber(3, temp_time[5]);
+              DrawNumber(2, temp_time[4]);
+              DrawNumber(1, temp_time[3]);
+              DrawNumber(0, temp_time[2]);
+            
+                int tmp = ~PINB;
+                // Increment 
+                if(tmp & 0x01 )
+                {
+                  temp_time[cur_digit]++;
+                }
+                // Decrement
+                if(tmp & 0x02 )
+                {
+                  temp_time[cur_digit]--;
+                }
+                // Proceed
+                //if(tmp & 0x03 )
+                //{
+                 // cur_digit--;
+                //}
+                
+                // Formatting
+                if(temp_time[5] > 2)
+                  temp_time[5] = 0;
+                if(temp_time[5] == 2 && temp_time[4] > 3)
+                  temp_time[4] = 0;
+                if(temp_time[4] > 9)
+                  temp_time[4] = 0;
+                if(temp_time[3] > 5)
+                  temp_time[3] = 0;
+                if(temp_time[2] > 9)
+                  temp_time[2] = 0;
+                
+                if(cur_digit < 2)
+                  break;
+                
+                click_available = 0;
+          }
+            
+	}
+        unsigned char time_cpy = 0;
+        for(time_cpy = 0; time_cpy < 6; time_cpy++)
+          time[time_cpy] = temp_time[time_cpy];
         
-	
 	for(;;) 
         {
-          // FORMATTING DATE  
+           FormatDate();
+            
+            // PRINTING
+            if ( time_var < 2)
+            {
+                  // print time
+                  DrawNumber(3, time[5]);
+                  DrawNumber(2, time[4]);
+                  DrawNumber(1, time[3]);
+                  DrawNumber(0, time[2]);
+            }
+            if ( time_var >= 2 && time_var < 7)
+            {
+                  // print date
+                  DrawNumber(3, date[0]);
+                  DrawNumber(2, date[1]);
+                  DrawNumber(1, date[2]);
+                  DrawNumber(0, date[3]);
+            }
+            if ( time_var >= 7 && time_var < 10)
+            {
+                  // print year
+                  DrawNumber(3, year[0]);
+                  DrawNumber(2, year[1]);
+                  DrawNumber(1, year[2]);
+                  DrawNumber(0, year[3]);
+            }
+            // reset
+            if (time_var >= 10)
+              time_var = 0;
+            
+            
+	}
+}
+
+void FormatDate()
+{
+            // FORMATTING DATE  
           // correct time
             if(time[2] > 9)
             {
@@ -439,44 +530,4 @@ int main(void) {
                   year[year_cond_var - 1] += 1;
                 }
             }
-            
-            
-            // PRINTING
-            if ( time_var < 5)
-            {
-                  // print time
-                  DrawNumber(3, time[5]);
-                  DrawNumber(2, time[4]);
-                  DrawNumber(1, time[3]);
-                  DrawNumber(0, time[2]);
-            }
-            if ( time_var >= 5 && time_var < 7)
-            {
-                  // print date
-                  DrawNumber(3, date[0]);
-                  DrawNumber(2, date[1]);
-                  DrawNumber(1, date[2]);
-                  DrawNumber(0, date[3]);
-            }
-            if ( time_var >= 7 && time_var < 7)
-            {
-                  // print year
-                  DrawNumber(3, year[0]);
-                  DrawNumber(2, year[1]);
-                  DrawNumber(1, year[2]);
-                  DrawNumber(0, year[3]);
-            }
-            // reset
-            if (time_var >= 7)
-              time_var = 0;
-            
-            
-
-          
-
-            
-      
-          
-
-	}
 }
