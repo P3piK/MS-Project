@@ -137,7 +137,6 @@ void max7219_decode(unsigned char icnum, unsigned char value)
 }
 
 
-
 /*
  * init the shift register
  */
