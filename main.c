@@ -184,7 +184,6 @@ void draw0(unsigned char ic)
   max7219_send(ic, 0x05, 34);
   max7219_send(ic, 0x06, 34);
   max7219_send(ic, 0x07, 28);
-  max7219_send(ic, 0x08, 0);
 }
 void draw1(unsigned char ic)
 {
@@ -195,7 +194,6 @@ void draw1(unsigned char ic)
   max7219_send(ic, 0x05, 2);
   max7219_send(ic, 0x06, 2);
   max7219_send(ic, 0x07, 2);
-  max7219_send(ic, 0x08, 0);
 }
 void draw2(unsigned char ic)
 {
@@ -206,7 +204,6 @@ void draw2(unsigned char ic)
   max7219_send(ic, 0x05, 32);
   max7219_send(ic, 0x06, 32);
   max7219_send(ic, 0x07, 28);
-  max7219_send(ic, 0x08, 0);
 }
 void draw3(unsigned char ic)
 {
@@ -217,7 +214,6 @@ void draw3(unsigned char ic)
   max7219_send(ic, 0x05, 2);
   max7219_send(ic, 0x06, 2);
   max7219_send(ic, 0x07, 28);
-  max7219_send(ic, 0x08, 0);
 }
 void draw4(unsigned char ic)
 {
@@ -228,7 +224,6 @@ void draw4(unsigned char ic)
   max7219_send(ic, 0x05, 2);
   max7219_send(ic, 0x06, 2);
   max7219_send(ic, 0x07, 2);
-  max7219_send(ic, 0x08, 0);
 }
 void draw5(unsigned char ic)
 {
@@ -239,7 +234,6 @@ void draw5(unsigned char ic)
   max7219_send(ic, 0x05, 2);
   max7219_send(ic, 0x06, 2);
   max7219_send(ic, 0x07, 28);
-  max7219_send(ic, 0x08, 0);
 }
 void draw6(unsigned char ic)
 {
@@ -250,7 +244,6 @@ void draw6(unsigned char ic)
   max7219_send(ic, 0x05, 34);
   max7219_send(ic, 0x06, 34);
   max7219_send(ic, 0x07, 28);
-  max7219_send(ic, 0x08, 0);
 }
 void draw7(unsigned char ic)
 {
@@ -261,7 +254,6 @@ void draw7(unsigned char ic)
   max7219_send(ic, 0x05, 16);
   max7219_send(ic, 0x06, 16);
   max7219_send(ic, 0x07, 16);
-  max7219_send(ic, 0x08, 0);
 }
 void draw8(unsigned char ic)
 {
@@ -272,7 +264,6 @@ void draw8(unsigned char ic)
   max7219_send(ic, 0x05, 34);
   max7219_send(ic, 0x06, 34);
   max7219_send(ic, 0x07, 28);
-  max7219_send(ic, 0x08, 0);
 }
 void draw9(unsigned char ic)
 {
@@ -283,7 +274,6 @@ void draw9(unsigned char ic)
   max7219_send(ic, 0x05, 2);
   max7219_send(ic, 0x06, 2);
   max7219_send(ic, 0x07, 28);
-  max7219_send(ic, 0x08, 0);
 }
 void drawColon(unsigned char ic)
 {
@@ -345,15 +335,20 @@ int ButtonLogic(int temp_arr[], int cur_digit);
 void SetTime();
 void SetDate();
 void SetYear();
+void SetTimer();
+void EnableTimer();
+void SignleButton(void fnc(), unsigned char btn);
 
 // GLOBAL VARIABLES
 int year[4] = { 2, 0, 0, 0 };   // yyyy
 int date[4] = { 1, 0, 0, 1 };   // mm.dd
 int time[6] = 0;                // hh:mm:ss
+int timer[4] = 0;               // hh:mm
 int time_var = 0;
 unsigned char blink_var = 0;
 unsigned char click_available = 0;
 unsigned char btn_clicked = 0;
+unsigned char timer_enabled = 1;
 
 // INTERRUPT
 #pragma vector = TIMER1_OVF_vect
@@ -398,6 +393,9 @@ int main(void) {
         {
            FormatDate();
             
+            SingleButton(SetTimer(), 0x03);
+            SingleButton(EnableTimer(), 0x05);
+           
             // PRINTING
             if ( time_var < 5)
             {
@@ -423,6 +421,21 @@ int main(void) {
                   DrawNumber(1, year[2]);
                   DrawNumber(0, year[3]);
             }
+            if(timer_enabled)
+            {
+              max7219_send(3, 0x08, 255);
+              max7219_send(2, 0x08, 255);
+              max7219_send(1, 0x08, 255);
+              max7219_send(0, 0x08, 255);
+            }
+            else
+            {
+              max7219_send(3, 0x08, 0);
+              max7219_send(2, 0x08, 0);
+              max7219_send(1, 0x08, 0);
+              max7219_send(0, 0x08, 0);
+            }
+            
             // reset
             if (time_var >= 9)
               time_var = 0;
@@ -657,4 +670,81 @@ void SetYear()
         for(time_cpy = 0; time_cpy < 4; time_cpy++)
           year[time_cpy] = temp_year[time_cpy];
   
+}
+void SetTimer()
+{
+        int temp_timer[4] = 0;
+        int cur_digit = 0;
+//        unsigned char printingBool = 0;
+        // SET Hour/Minute
+        for(;;)
+        {
+          // print time
+          DrawNumber(3, temp_timer[0]);
+          DrawNumber(2, temp_timer[1]);
+//          if(!printingBool)
+//          {
+            DrawNumber(1, temp_timer[2]);
+//            printingBool = 1;
+//          }
+//          else
+//          {
+//            DrawNumber(1, 10); // draw colon
+//            printingBool = 0;
+//          }
+          DrawNumber(0, temp_timer[3]);
+          
+          cur_digit = ButtonLogic(temp_timer, cur_digit);      // Handle buttons
+          
+                // Formatting
+                if(temp_timer[0] > 2)
+                  temp_timer[0] = 0;
+                if(temp_timer[0] == 2 && temp_timer[1] > 3)
+                  temp_timer[1] = 0;
+                if(temp_timer[1] > 9)
+                  temp_timer[1] = 0;
+                if(temp_timer[2] > 5)
+                  temp_timer[2] = 0;
+                if(temp_timer[3] > 9)
+                  temp_timer[3] = 0;
+                unsigned char formatVar = 0;
+                for(formatVar = 0; formatVar < 6; formatVar++)
+                  if(temp_timer[formatVar] < 0)
+                    temp_timer[formatVar] = 0;
+                
+                if(cur_digit > 3)
+                  break;
+                
+            
+	}
+        unsigned char time_cpy = 0;
+        for(time_cpy = 0; time_cpy < 4; time_cpy++)
+          timer[time_cpy] = temp_timer[time_cpy];
+}
+void SignleButton(void fnc(), unsigned char btn)
+{
+            if (!btn_clicked)
+            {
+                int tmp = ~PINB;
+                // Set timer 
+                if(tmp & btn )
+                {
+                  fnc();
+                  btn_clicked = 1;
+                }
+            }
+            else
+            {
+              if(!(~PINB & btn))
+              {
+                int i = 0;
+                for(i = 0; i < 1000; i++) // to make some delay
+                  ;
+                btn_clicked = 0;
+              }
+            }
+}
+void EnableTimer()
+{
+  timer_enabled = ~timer_enabled;
 }
