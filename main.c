@@ -155,9 +155,10 @@ void max7219_init() {
 void initDevices()
 {
   DDRB = 0x00;
+  PORTB = 0xFF;
   TCCR0 |= (1 << CS01);
   TCCR1B |= (1 << CS12);
-  TIMSK |= (1 << TOIE0) | (1 << TOIE1) | (1 << TOIE2);
+  TIMSK |= (1 << TOIE0) | (1 << TOIE1) | (1 << TOIE3);
 }
 
 int numTable[10][8] = {
@@ -337,10 +338,11 @@ int time[6] = 0; // hh:mm:ss
 int time_var = 0;
 unsigned char blink_var = 0;
 unsigned char click_available = 0;
+unsigned char btn_clicked = 0;
 
 // INTERRUPT
 #pragma vector = TIMER1_OVF_vect
- __interrupt void timer()
+ __interrupt void timer1()
  {
         TCNT1 = 36735;
    
@@ -351,13 +353,13 @@ unsigned char click_available = 0;
         
         time_var++; 
  }
-#pragma vector = TIMER2_OVF_vect
- __interrupt void timer2()
+#pragma vector = TIMER3_OVF_vect
+ __interrupt void timer3()
  {
-    TCNT2 = 20000;
+    TCNT3 = 1000;
     
     click_available = 1;
-   
+    btn_clicked = 0;
  }
 
 
@@ -383,34 +385,53 @@ int main(void) {
         
         int cur_digit = 5;
         int temp_time[6] = 0;
+        
         // SET Hour/Minute
         for(;;)
         {
-          unsigned char btn_clicked = 0;
-          if(click_available)
-          {
-              // print time
-              DrawNumber(3, temp_time[5]);
-              DrawNumber(2, temp_time[4]);
-              DrawNumber(1, temp_time[3]);
-              DrawNumber(0, temp_time[2]);
-            
+          
+          // print time
+          DrawNumber(3, temp_time[5]);
+          DrawNumber(2, temp_time[4]);
+          DrawNumber(1, temp_time[3]);
+          DrawNumber(0, temp_time[2]);
+              
+          //if(click_available)
+          //{
+            if (!btn_clicked)
+            {
                 int tmp = ~PINB;
                 // Increment 
                 if(tmp & 0x01 )
                 {
                   temp_time[cur_digit]++;
+                  btn_clicked = 1;
                 }
                 // Decrement
-                if(tmp & 0x02 )
+                else if(tmp & 0x02 )
                 {
                   temp_time[cur_digit]--;
+                  btn_clicked = 1;
                 }
                 // Proceed
-                //if(tmp & 0x03 )
-                //{
-                 // cur_digit--;
-                //}
+                else if(tmp & 0x04 )
+                {
+                  cur_digit--;
+                  btn_clicked = 1;
+                }
+                  
+            }
+            else
+            {
+              if(!(~PINB & 0x01) && !(~PINB & 0x02) && !(~PINB & 0x04))
+              {
+                int i = 0;
+                for(i = 0; i < 1000; i++) // to make some delay
+                  ;
+                btn_clicked = 0;
+              }
+            }
+                
                 
                 // Formatting
                 if(temp_time[5] > 2)
@@ -423,12 +444,16 @@ int main(void) {
                   temp_time[3] = 0;
                 if(temp_time[2] > 9)
                   temp_time[2] = 0;
+                unsigned char formatVar = 0;
+                for(formatVar = 0; formatVar < 6; formatVar++)
+                  if(temp_time[formatVar] < 0)
+                    temp_time[formatVar] = 0;
                 
                 if(cur_digit < 2)
                   break;
                 
-                click_available = 0;
-          }
+                // click_available = 0;
+          //}
             
 	}
         unsigned char time_cpy = 0;
