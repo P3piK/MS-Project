@@ -343,11 +343,13 @@ void clearDisplay(unsigned char ic)
 void FormatDate();
 int ButtonLogic(int temp_arr[], int cur_digit);
 void SetTime();
+void SetDate();
+void SetYear();
 
 // GLOBAL VARIABLES
-int year[4] = { 2, 0, 0, 0 }; // yyyy
-int date[4] = { 1, 0, 0, 1 }; // mm.dd
-int time[6] = 0; // hh:mm:ss
+int year[4] = { 2, 0, 0, 0 };   // yyyy
+int date[4] = { 1, 0, 0, 1 };   // mm.dd
+int time[6] = 0;                // hh:mm:ss
 int time_var = 0;
 unsigned char blink_var = 0;
 unsigned char click_available = 0;
@@ -358,21 +360,12 @@ unsigned char btn_clicked = 0;
  __interrupt void timer1()
  {
         TCNT1 = 36735;
-   
-        // CHANGE
+
         // FOR TESTING INCREMENTS MINUTES
-        time[2]++;    // increment seconds
+        time[3]++;    // increment seconds
         //date[3]++;
         
         time_var++; 
- }
-#pragma vector = TIMER3_OVF_vect
- __interrupt void timer3()
- {
-    TCNT3 = 1000;
-    
-    click_available = 1;
-    btn_clicked = 0;
  }
 
 int main(void) {
@@ -394,8 +387,8 @@ int main(void) {
 	}
         
         // Setting time and date by user
-        //SetYear();
-        //SetDate();
+        SetYear();
+        SetDate();
         SetTime();    
         
         
@@ -409,10 +402,10 @@ int main(void) {
             if ( time_var < 5)
             {
                   // print time
-                  DrawNumber(3, time[5]);
-                  DrawNumber(2, time[4]);
-                  DrawNumber(1, time[3]);
-                  DrawNumber(0, time[2]);
+                  DrawNumber(3, time[0]);
+                  DrawNumber(2, time[1]);
+                  DrawNumber(1, time[2]);
+                  DrawNumber(0, time[3]);
             }
             if ( time_var >= 5 && time_var < 7)
             {
@@ -441,25 +434,25 @@ void FormatDate()
 {
             // FORMATTING DATE  
           // correct time
-            if(time[2] > 9)
-            {
-              time[2] = 0;
-              time[3] += 1;
-            }
-            if(time[3] > 5)
+            if(time[3] > 9)
             {
               time[3] = 0;
-              time[4] += 1;
+              time[2] += 1;
             }
-            if(time[4] > 9)
+            if(time[2] > 5)
             {
-              time[4] = 0;
-              time[5] += 1;
+              time[2] = 0;
+              time[1] += 1;
             }
-            if(time[5] == 2 && time[4] > 3)
+            if(time[1] > 9)
             {
-              time[4] = 0;
-              time[5] = 0;
+              time[1] = 0;
+              time[0] += 1;
+            }
+            if(time[0] == 2 && time[1] > 3)
+            {
+              time[1] = 0;
+              time[0] = 0;
               date[3] += 1; // increment date
             }
             // correct date
@@ -516,7 +509,7 @@ int ButtonLogic(int temp_arr[], int cur_digit)
                 // Proceed
                 else if(tmp & 0x04 )
                 {
-                  cur_digit--;
+                  cur_digit++;
                   btn_clicked = 1;
                 }
             }
@@ -536,17 +529,17 @@ int ButtonLogic(int temp_arr[], int cur_digit)
 void SetTime()
 {
         int temp_time[6] = 0;
-        int cur_digit = 5;
+        int cur_digit = 0;
 //        unsigned char printingBool = 0;
         // SET Hour/Minute
         for(;;)
         {
           // print time
-          DrawNumber(3, temp_time[5]);
-          DrawNumber(2, temp_time[4]);
+          DrawNumber(3, temp_time[0]);
+          DrawNumber(2, temp_time[1]);
 //          if(!printingBool)
 //          {
-            DrawNumber(1, temp_time[3]);
+            DrawNumber(1, temp_time[2]);
 //            printingBool = 1;
 //          }
 //          else
@@ -554,27 +547,27 @@ void SetTime()
 //            DrawNumber(1, 10); // draw colon
 //            printingBool = 0;
 //          }
-          DrawNumber(0, temp_time[2]);
+          DrawNumber(0, temp_time[3]);
           
           cur_digit = ButtonLogic(temp_time, cur_digit);      // Handle buttons
           
                 // Formatting
-                if(temp_time[5] > 2)
-                  temp_time[5] = 0;
-                if(temp_time[5] == 2 && temp_time[4] > 3)
-                  temp_time[4] = 0;
-                if(temp_time[4] > 9)
-                  temp_time[4] = 0;
-                if(temp_time[3] > 5)
-                  temp_time[3] = 0;
-                if(temp_time[2] > 9)
+                if(temp_time[0] > 2)
+                  temp_time[0] = 0;
+                if(temp_time[0] == 2 && temp_time[1] > 3)
+                  temp_time[1] = 0;
+                if(temp_time[1] > 9)
+                  temp_time[1] = 0;
+                if(temp_time[2] > 5)
                   temp_time[2] = 0;
+                if(temp_time[3] > 9)
+                  temp_time[3] = 0;
                 unsigned char formatVar = 0;
                 for(formatVar = 0; formatVar < 6; formatVar++)
                   if(temp_time[formatVar] < 0)
                     temp_time[formatVar] = 0;
                 
-                if(cur_digit < 2)
+                if(cur_digit > 3)
                   break;
                 
             
@@ -582,4 +575,86 @@ void SetTime()
         unsigned char time_cpy = 0;
         for(time_cpy = 0; time_cpy < 6; time_cpy++)
           time[time_cpy] = temp_time[time_cpy];
+}
+void SetDate()
+{
+        int temp_date[4] = {0, 1, 0, 1};
+        int cur_digit = 0;
+        // SET Day/Month
+        for(;;)
+        {
+          // print time
+          DrawNumber(3, temp_date[0]);
+          DrawNumber(2, temp_date[1]);
+          DrawNumber(1, temp_date[2]);
+          DrawNumber(0, temp_date[3]);
+          
+          cur_digit = ButtonLogic(temp_date, cur_digit);      // Handle buttons
+          
+                // Formatting
+                if(temp_date[0] > 1)
+                  temp_date[0] = 0;
+                if(temp_date[0] == 1 && temp_date[1] > 2)
+                  temp_date[1] = 0;
+                if(temp_date[1] > 9)
+                  temp_date[1] = 0;
+                if(temp_date[2] > 3)
+                  temp_date[2] = 0;
+                if(temp_date[2] == 3 && temp_date[3] > 1)
+                  temp_date[3] = 0;
+                if(temp_date[3] > 9)
+                  temp_date[3] = 0;
+                if(temp_date[0] == 0 && temp_date[1] < 1)
+                  temp_date[1] = 1;
+                if(temp_date[2] == 0 && temp_date[3] < 1)
+                  temp_date[3] = 1;
+                unsigned char formatVar = 0;
+                for(formatVar = 0; formatVar < 4; formatVar++)
+                  if(temp_date[formatVar] < 0)
+                    temp_date[formatVar] = 0;
+                
+                if(cur_digit > 3)
+                  break;
+                
+            
+	}
+        unsigned char time_cpy = 0;
+        for(time_cpy = 0; time_cpy < 4; time_cpy++)
+          date[time_cpy] = temp_date[time_cpy];
+}
+void SetYear()
+{
+        int temp_year[4] = {2, 0, 0, 0};
+        int cur_digit = 2;
+        // SET Year
+        for(;;)
+        {
+          // print time
+          DrawNumber(3, temp_year[0]);
+          DrawNumber(2, temp_year[1]);
+          DrawNumber(1, temp_year[2]);
+          DrawNumber(0, temp_year[3]);
+          
+          cur_digit = ButtonLogic(temp_year, cur_digit);      // Handle buttons
+          
+                // Formatting
+                if(temp_year[2] > 9)
+                  temp_year[2] = 0;
+                if(temp_year[3] > 9)
+                  temp_year[3] = 0;
+                
+                unsigned char formatVar = 0;
+                for(formatVar = 0; formatVar < 4; formatVar++)
+                  if(temp_year[formatVar] < 0)
+                    temp_year[formatVar] = 0;
+                
+                if(cur_digit > 3)
+                  break;
+                
+            
+	}
+        unsigned char time_cpy = 0;
+        for(time_cpy = 0; time_cpy < 4; time_cpy++)
+          year[time_cpy] = temp_year[time_cpy];
+  
 }
