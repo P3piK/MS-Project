@@ -285,6 +285,11 @@ void draw9(unsigned char ic)
   max7219_send(ic, 0x07, 28);
   max7219_send(ic, 0x08, 0);
 }
+void drawColon(unsigned char ic)
+{
+  max7219_send(ic, 0x03, 128);
+  max7219_send(ic, 0x05, 128);
+}
 
 void DrawNumber(unsigned char ic, int value)
 {
@@ -320,6 +325,12 @@ void DrawNumber(unsigned char ic, int value)
   case 9:
     draw9(ic);
     break;
+  case 10:  // colon
+    drawColon(ic);
+    break;
+  case 11:  // dot
+    max7219_send(ic, 0x07, 128);
+    break;
   }
 }
 
@@ -330,6 +341,8 @@ void clearDisplay(unsigned char ic)
 }
 
 void FormatDate();
+int ButtonLogic(int temp_arr[], int cur_digit);
+void SetTime();
 
 // GLOBAL VARIABLES
 int year[4] = { 2, 0, 0, 0 }; // yyyy
@@ -362,9 +375,6 @@ unsigned char btn_clicked = 0;
     btn_clicked = 0;
  }
 
-
-
-
 int main(void) {
 	max7219_init();
         initDevices();
@@ -383,89 +393,20 @@ int main(void) {
 		max7219_scanlimit(ic, 15);
 	}
         
-        int cur_digit = 5;
-        int temp_time[6] = 0;
+        // Setting time and date by user
+        //SetYear();
+        //SetDate();
+        SetTime();    
         
-        // SET Hour/Minute
-        for(;;)
-        {
-          
-          // print time
-          DrawNumber(3, temp_time[5]);
-          DrawNumber(2, temp_time[4]);
-          DrawNumber(1, temp_time[3]);
-          DrawNumber(0, temp_time[2]);
-              
-          //if(click_available)
-          //{
-            if (!btn_clicked)
-            {
-                int tmp = ~PINB;
-                // Increment 
-                if(tmp & 0x01 )
-                {
-                  temp_time[cur_digit]++;
-                  btn_clicked = 1;
-                }
-                // Decrement
-                else if(tmp & 0x02 )
-                {
-                  temp_time[cur_digit]--;
-                  btn_clicked = 1;
-                }
-                // Proceed
-                else if(tmp & 0x04 )
-                {
-                  cur_digit--;
-                  btn_clicked = 1;
-                }
-                  
-            }
-            else
-            {
-              if(!(~PINB & 0x01) && !(~PINB & 0x02) && !(~PINB & 0x04))
-              {
-                int i = 0;
-                for(i = 0; i < 1000; i++) // to make some delay
-                  ;
-                btn_clicked = 0;
-              }
-            }
-                
-                
-                // Formatting
-                if(temp_time[5] > 2)
-                  temp_time[5] = 0;
-                if(temp_time[5] == 2 && temp_time[4] > 3)
-                  temp_time[4] = 0;
-                if(temp_time[4] > 9)
-                  temp_time[4] = 0;
-                if(temp_time[3] > 5)
-                  temp_time[3] = 0;
-                if(temp_time[2] > 9)
-                  temp_time[2] = 0;
-                unsigned char formatVar = 0;
-                for(formatVar = 0; formatVar < 6; formatVar++)
-                  if(temp_time[formatVar] < 0)
-                    temp_time[formatVar] = 0;
-                
-                if(cur_digit < 2)
-                  break;
-                
-                // click_available = 0;
-          //}
-            
-	}
-        unsigned char time_cpy = 0;
-        for(time_cpy = 0; time_cpy < 6; time_cpy++)
-          time[time_cpy] = temp_time[time_cpy];
         
+        
+        // MAIN LOOP
 	for(;;) 
         {
            FormatDate();
             
             // PRINTING
-            if ( time_var < 2)
+            if ( time_var < 5)
             {
                   // print time
                   DrawNumber(3, time[5]);
@@ -473,7 +414,7 @@ int main(void) {
                   DrawNumber(1, time[3]);
                   DrawNumber(0, time[2]);
             }
-            if ( time_var >= 2 && time_var < 7)
+            if ( time_var >= 5 && time_var < 7)
             {
                   // print date
                   DrawNumber(3, date[0]);
@@ -481,7 +422,7 @@ int main(void) {
                   DrawNumber(1, date[2]);
                   DrawNumber(0, date[3]);
             }
-            if ( time_var >= 7 && time_var < 10)
+            if ( time_var >= 7 && time_var < 9)
             {
                   // print year
                   DrawNumber(3, year[0]);
@@ -490,9 +431,8 @@ int main(void) {
                   DrawNumber(0, year[3]);
             }
             // reset
-            if (time_var >= 10)
+            if (time_var >= 9)
               time_var = 0;
-            
             
 	}
 }
@@ -555,4 +495,91 @@ void FormatDate()
                   year[year_cond_var - 1] += 1;
                 }
             }
+}
+int ButtonLogic(int temp_arr[], int cur_digit)
+{
+            if (!btn_clicked)
+            {
+                int tmp = ~PINB;
+                // Increment 
+                if(tmp & 0x01 )
+                {
+                  temp_arr[cur_digit]++;
+                  btn_clicked = 1;
+                }
+                // Decrement
+                else if(tmp & 0x02 )
+                {
+                  temp_arr[cur_digit]--;
+                  btn_clicked = 1;
+                }
+                // Proceed
+                else if(tmp & 0x04 )
+                {
+                  cur_digit--;
+                  btn_clicked = 1;
+                }
+            }
+            else
+            {
+              if(!(~PINB & 0x01) && !(~PINB & 0x02) && !(~PINB & 0x04))
+              {
+                int i = 0;
+                for(i = 0; i < 1000; i++) // to make some delay
+                  ;
+                btn_clicked = 0;
+              }
+            }
+            
+            return cur_digit;
+}
+void SetTime()
+{
+        int temp_time[6] = 0;
+        int cur_digit = 5;
+//        unsigned char printingBool = 0;
+        // SET Hour/Minute
+        for(;;)
+        {
+          // print time
+          DrawNumber(3, temp_time[5]);
+          DrawNumber(2, temp_time[4]);
+//          if(!printingBool)
+//          {
+            DrawNumber(1, temp_time[3]);
+//            printingBool = 1;
+//          }
+//          else
+//          {
+//            DrawNumber(1, 10); // draw colon
+//            printingBool = 0;
+//          }
+          DrawNumber(0, temp_time[2]);
+          
+          cur_digit = ButtonLogic(temp_time, cur_digit);      // Handle buttons
+          
+                // Formatting
+                if(temp_time[5] > 2)
+                  temp_time[5] = 0;
+                if(temp_time[5] == 2 && temp_time[4] > 3)
+                  temp_time[4] = 0;
+                if(temp_time[4] > 9)
+                  temp_time[4] = 0;
+                if(temp_time[3] > 5)
+                  temp_time[3] = 0;
+                if(temp_time[2] > 9)
+                  temp_time[2] = 0;
+                unsigned char formatVar = 0;
+                for(formatVar = 0; formatVar < 6; formatVar++)
+                  if(temp_time[formatVar] < 0)
+                    temp_time[formatVar] = 0;
+                
+                if(cur_digit < 2)
+                  break;
+                
+            
+	}
+        unsigned char time_cpy = 0;
+        for(time_cpy = 0; time_cpy < 6; time_cpy++)
+          time[time_cpy] = temp_time[time_cpy];
 }
