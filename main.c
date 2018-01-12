@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <ioavr.h>
 #include <intrinsics.h>
@@ -337,7 +336,7 @@ void SetDate();
 void SetYear();
 void SetTimer();
 void EnableTimer();
-void SignleButton(void fnc(), unsigned char btn);
+void SingleButton(void fnc(), unsigned char btn);
 
 // GLOBAL VARIABLES
 int year[4] = { 2, 0, 0, 0 };   // yyyy
@@ -393,8 +392,8 @@ int main(void) {
         {
            FormatDate();
             
-            SingleButton(SetTimer(), 0x03);
-            SingleButton(EnableTimer(), 0x05);
+            SingleButton(SetTimer, 0x10);
+            SingleButton(EnableTimer, 0x08);
            
             // PRINTING
             if ( time_var < 5)
@@ -674,6 +673,10 @@ void SetYear()
 void SetTimer()
 {
         int temp_timer[4] = 0;
+        unsigned char time_cpy = 0;
+        for(time_cpy = 0; time_cpy < 4; time_cpy++)
+          temp_timer[time_cpy] = timer[time_cpy];
+        
         int cur_digit = 0;
 //        unsigned char printingBool = 0;
         // SET Hour/Minute
@@ -717,11 +720,11 @@ void SetTimer()
                 
             
 	}
-        unsigned char time_cpy = 0;
+       
         for(time_cpy = 0; time_cpy < 4; time_cpy++)
           timer[time_cpy] = temp_timer[time_cpy];
 }
-void SignleButton(void fnc(), unsigned char btn)
+void SingleButton(void fnc(), unsigned char btn)
 {
             if (!btn_clicked)
             {
@@ -746,5 +749,8 @@ void SignleButton(void fnc(), unsigned char btn)
 }
 void EnableTimer()
 {
-  timer_enabled = ~timer_enabled;
+  if(timer_enabled)
+    timer_enabled = 0;
+  else
+    timer_enabled = 1;
 }
