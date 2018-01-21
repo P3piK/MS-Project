@@ -148,14 +148,14 @@ void initDevices()
 
 int numTable[10][7] = {
 	{ 28, 34, 34, 34, 34, 34, 28 },			// 0
-	{ 2, 2, 2, 2, 2, 2, 2 },			// 1
+	{ 2, 2, 2, 2, 2, 2, 2 },				// 1
 	{ 28, 2, 2, 28, 32, 32, 28 },			// 2
-	{ 28, 2, 2, 28, 2, 2, 28 },			// 3
+	{ 28, 2, 2, 28, 2, 2, 28 },				// 3
 	{ 34, 34, 34, 28, 2, 2, 2 },			// 4
 	{ 28, 32, 32, 28, 2, 2, 28 },			// 5
 	{ 28, 32, 32, 28, 34, 34, 28 },			// 6
-	{ 126, 2, 4, 8, 16, 16, 16 },		        // 7
-	{ 28, 34, 34, 28, 34, 34, 28 },		        // 8
+	{ 126, 2, 4, 8, 16, 16, 16 },		    // 7
+	{ 28, 34, 34, 28, 34, 34, 28 },		    // 8
 	{ 28, 34, 34, 28, 2, 2, 28 }			// 9
 };
 
@@ -168,11 +168,11 @@ void Draw(unsigned char ic, int number)
 	{
 		max7219_send(ic, cur_line + 1, numTable[number][cur_line]);
 	}
-        if(timer_enabled)
-          max7219_send(ic, 8, 255);
-        else
-          max7219_send(ic, 8, 0);
-          
+	if (timer_enabled)
+		max7219_send(ic, 8, 255);
+	else
+		max7219_send(ic, 8, 0);
+
 }
 void DrawWithColon(unsigned char ic, int number)
 {
@@ -193,11 +193,11 @@ void DrawWithColon(unsigned char ic, int number)
 	{
 		max7219_send(ic, cur_line + 1, tempNum[cur_line]);
 	}
-        
-        if(timer_enabled)
-          max7219_send(ic, 8, 255);
-        else
-          max7219_send(ic, 8, 0);
+
+	if (timer_enabled)
+		max7219_send(ic, 8, 255);
+	else
+		max7219_send(ic, 8, 0);
 }
 void DrawWithDot(unsigned char ic, int number)
 {
@@ -217,150 +217,10 @@ void DrawWithDot(unsigned char ic, int number)
 	{
 		max7219_send(ic, cur_line + 1, tempNum[cur_line]);
 	}
-        if(timer_enabled)
-          max7219_send(ic, 8, 255);
-        else
-          max7219_send(ic, 8, 0);
-}
-
-
-void draw0(unsigned char ic)
-{
-	max7219_send(ic, 0x01, 28);
-	max7219_send(ic, 0x02, 34);
-	max7219_send(ic, 0x03, 34);
-	max7219_send(ic, 0x04, 34);
-	max7219_send(ic, 0x05, 34);
-	max7219_send(ic, 0x06, 34);
-	max7219_send(ic, 0x07, 28);
-}
-void draw1(unsigned char ic)
-{
-	max7219_send(ic, 0x01, 2);
-	max7219_send(ic, 0x02, 2);
-	max7219_send(ic, 0x03, 2);
-	max7219_send(ic, 0x04, 2);
-	max7219_send(ic, 0x05, 2);
-	max7219_send(ic, 0x06, 2);
-	max7219_send(ic, 0x07, 2);
-}
-void draw2(unsigned char ic)
-{
-	max7219_send(ic, 0x01, 28);
-	max7219_send(ic, 0x02, 2);
-	max7219_send(ic, 0x03, 2);
-	max7219_send(ic, 0x04, 28);
-	max7219_send(ic, 0x05, 32);
-	max7219_send(ic, 0x06, 32);
-	max7219_send(ic, 0x07, 28);
-}
-void draw3(unsigned char ic)
-{
-	max7219_send(ic, 0x01, 28);
-	max7219_send(ic, 0x02, 2);
-	max7219_send(ic, 0x03, 2);
-	max7219_send(ic, 0x04, 28);
-	max7219_send(ic, 0x05, 2);
-	max7219_send(ic, 0x06, 2);
-	max7219_send(ic, 0x07, 28);
-}
-void draw4(unsigned char ic)
-{
-	max7219_send(ic, 0x01, 34);
-	max7219_send(ic, 0x02, 34);
-	max7219_send(ic, 0x03, 34);
-	max7219_send(ic, 0x04, 28);
-	max7219_send(ic, 0x05, 2);
-	max7219_send(ic, 0x06, 2);
-	max7219_send(ic, 0x07, 2);
-}
-void draw5(unsigned char ic)
-{
-	max7219_send(ic, 0x01, 28);
-	max7219_send(ic, 0x02, 32);
-	max7219_send(ic, 0x03, 32);
-	max7219_send(ic, 0x04, 28);
-	max7219_send(ic, 0x05, 2);
-	max7219_send(ic, 0x06, 2);
-	max7219_send(ic, 0x07, 28);
-}
-void draw6(unsigned char ic)
-{
-	max7219_send(ic, 0x01, 28);
-	max7219_send(ic, 0x02, 32);
-	max7219_send(ic, 0x03, 32);
-	max7219_send(ic, 0x04, 28);
-	max7219_send(ic, 0x05, 34);
-	max7219_send(ic, 0x06, 34);
-	max7219_send(ic, 0x07, 28);
-}
-void draw7(unsigned char ic)
-{
-	max7219_send(ic, 0x01, 126);
-	max7219_send(ic, 0x02, 2);
-	max7219_send(ic, 0x03, 4);
-	max7219_send(ic, 0x04, 8);
-	max7219_send(ic, 0x05, 16);
-	max7219_send(ic, 0x06, 16);
-	max7219_send(ic, 0x07, 16);
-}
-void draw8(unsigned char ic)
-{
-	max7219_send(ic, 0x01, 28);
-	max7219_send(ic, 0x02, 34);
-	max7219_send(ic, 0x03, 34);
-	max7219_send(ic, 0x04, 28);
-	max7219_send(ic, 0x05, 34);
-	max7219_send(ic, 0x06, 34);
-	max7219_send(ic, 0x07, 28);
-}
-void draw9(unsigned char ic)
-{
-	max7219_send(ic, 0x01, 28);
-	max7219_send(ic, 0x02, 34);
-	max7219_send(ic, 0x03, 34);
-	max7219_send(ic, 0x04, 28);
-	max7219_send(ic, 0x05, 2);
-	max7219_send(ic, 0x06, 2);
-	max7219_send(ic, 0x07, 28);
-}
-
-
-void DrawNumber(unsigned char ic, int value)
-{
-	switch (value)
-	{
-	case 0:
-		draw0(ic);
-		break;
-	case 1:
-		draw1(ic);
-		break;
-	case 2:
-		draw2(ic);
-		break;
-	case 3:
-		draw3(ic);
-		break;
-	case 4:
-		draw4(ic);
-		break;
-	case 5:
-		draw5(ic);
-		break;
-	case 6:
-		draw6(ic);
-		break;
-	case 7:
-		draw7(ic);
-		break;
-	case 8:
-		draw8(ic);
-		break;
-	case 9:
-		draw9(ic);
-		break;
-	}
+	if (timer_enabled)
+		max7219_send(ic, 8, 255);
+	else
+		max7219_send(ic, 8, 0);
 }
 
 void clearDisplay(unsigned char ic)
@@ -370,8 +230,8 @@ void clearDisplay(unsigned char ic)
 }
 void lightDisplay(unsigned char ic)
 {
-    for(int j=0; j<8; j++)
-        max7219_send(ic, j+1, 255);
+	for (int j = 0; j < 8; j++)
+		max7219_send(ic, j + 1, 255);
 }
 
 void FormatDate();
@@ -404,13 +264,13 @@ __interrupt void timer1()
 	TCNT1 = 36735;
 
 	// FOR TESTING INCREMENTS MINUTES
-	time[3]++;    // increment seconds
-	//date[3]++;
+	time[3]++;    
+	//time[5]++;	// increment seconds
 
 	time_var++;
-        if(timer_hit)
-          timer_released++;
-        
+	if (timer_hit)
+		timer_released++;
+
 }
 
 int main(void) {
@@ -419,8 +279,6 @@ int main(void) {
 	__enable_interrupt();
 
 	unsigned char ic = 0;
-        
-
 
 	// init ic
 	for (ic = 0; ic < MAX7219_ICNUMBER; ic++)
@@ -432,73 +290,70 @@ int main(void) {
 		max7219_scanlimit(ic, 15);
 	}
 
-        clearDisplay(0);
-        clearDisplay(1);
-        clearDisplay(2);
-        clearDisplay(3);
-        
-        // Setting time and date by user
-        SetYear();
-        SetDate();
-        SetTime();
+	clearDisplay(0);
+	clearDisplay(1);
+	clearDisplay(2);
+	clearDisplay(3);
+
+	// Setting time and date by user
+	SetYear();
+	SetDate();
+	SetTime();
 
 
 
 	// MAIN LOOP
 	for (;;)
 	{
-                
-          
 
-                
-                    FormatDate();
-    
-                    SingleButton(SetTimer, 0x10);
-                    SingleButton(EnableTimer, 0x08);
-    
-                    // PRINTING
-                    if (time_var < 5)
-                    {
-                            // print time
-                            Draw(3, time[0]);
-                            Draw(2, time[1]);
-                            DrawWithColon(1, time[2]);
-                            Draw(0, time[3]);
-                    }
-                    if (time_var >= 5 && time_var < 7)
-                    {
-                            // print date
-                            Draw(3, date[0]);
-                            Draw(2, date[1]);
-                            DrawWithDot(1, date[2]);
-                            Draw(0, date[3]);
-                    }
-                    if (time_var >= 7 && time_var < 9)
-                    {
-                            // print year
-                            Draw(3, year[0]);
-                            Draw(2, year[1]);
-                            Draw(1, year[2]);
-                            Draw(0, year[3]);
-                    }
-    
-                    // reset
-                    if (time_var >= 9)
-                            time_var = 0;
+		FormatDate();
 
-                
-                if(timer_hit)
-                {
-                  if(timer_enabled)
-                  for (ic=0; ic < MAX7219_ICNUMBER; ic++)
-                     lightDisplay(ic);
-                  
-                    if(timer_released > 10)
-                      timer_hit = 0;
-                }
-                else
-                  CompareTimeWithTimer();
-                    
+		SingleButton(SetTimer, 0x10);
+		SingleButton(EnableTimer, 0x08);
+
+		// PRINTING
+		if (time_var < 5)
+		{
+			// print time
+			Draw(3, time[0]);
+			Draw(2, time[1]);
+			DrawWithColon(1, time[2]);
+			Draw(0, time[3]);
+		}
+		if (time_var >= 5 && time_var < 7)
+		{
+			// print date
+			Draw(3, date[0]);
+			Draw(2, date[1]);
+			DrawWithDot(1, date[2]);
+			Draw(0, date[3]);
+		}
+		if (time_var >= 7 && time_var < 9)
+		{
+			// print year
+			Draw(3, year[0]);
+			Draw(2, year[1]);
+			Draw(1, year[2]);
+			Draw(0, year[3]);
+		}
+
+		// reset
+		if (time_var >= 9)
+			time_var = 0;
+
+
+		if (timer_hit)
+		{
+			if (timer_enabled)
+				for (ic = 0; ic < MAX7219_ICNUMBER; ic++)
+					lightDisplay(ic);
+
+			if (timer_released > 10)
+				timer_hit = 0;
+		}
+		else
+			CompareTimeWithTimer();
+
 
 	}
 }
@@ -611,7 +466,7 @@ void SetTime()
 		Draw(3, temp_time[0]);
 		Draw(2, temp_time[1]);
 		Draw(1, temp_time[2]);
-                // DrawWithColon(1, temp_time[2]);
+		// DrawWithColon(1, temp_time[2]);
 		Draw(0, temp_time[3]);
 
 		cur_digit = ButtonLogic(temp_time, cur_digit);      // Handle buttons
@@ -652,7 +507,7 @@ void SetDate()
 		Draw(3, temp_date[0]);
 		Draw(2, temp_date[1]);
 		Draw(1, temp_date[2]);
-                // DrawWithDot(1, temp_date[2]);
+		// DrawWithDot(1, temp_date[2]);
 		Draw(0, temp_date[3]);
 
 		cur_digit = ButtonLogic(temp_date, cur_digit);      // Handle buttons
@@ -740,7 +595,7 @@ void SetTimer()
 		Draw(3, temp_timer[0]);
 		Draw(2, temp_timer[1]);
 		Draw(1, temp_timer[2]);
-                // DrawWithColon(1, temp_timer[2]);
+		// DrawWithColon(1, temp_timer[2]);
 		Draw(0, temp_timer[3]);
 
 		cur_digit = ButtonLogic(temp_timer, cur_digit);      // Handle buttons
@@ -775,7 +630,6 @@ void SingleButton(void fnc(), int btn)
 	if (!btn_clicked)
 	{
 		int tmp = ~PINB;
-		// Set timer 
 		if (tmp & btn)
 		{
 			fnc();
@@ -789,7 +643,6 @@ void SingleButton(void fnc(), int btn)
 			int i = 0;
 			for (i = 0; i < 10000; i++) // to make some delay
 				;
-                        __delay_cycles(500);
 			btn_clicked = 0;
 		}
 	}
@@ -803,17 +656,17 @@ void EnableTimer()
 }
 void CompareTimeWithTimer()
 {
-  int time_comp_var = 0;
-  for(time_comp_var = 0; time_comp_var < 4; time_comp_var++)
-  {
-    if(time[time_comp_var] != timer[time_comp_var])
-    {
-      timer_hit = 0;
-      return;
-    }
-  }
-  
-  timer_hit = 1;
-  timer_released = 1;
- 
+	int time_comp_var = 0;
+	for (time_comp_var = 0; time_comp_var < 4; time_comp_var++)
+	{
+		if (time[time_comp_var] != timer[time_comp_var])
+		{
+			timer_hit = 0;
+			return;
+		}
+	}
+
+	timer_hit = 1;
+	timer_released = 1;
+
 }
